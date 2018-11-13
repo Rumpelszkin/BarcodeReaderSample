@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="com.varvet.barcodereadersample.MainActivity">
+    >
 
     <TextView
         android:id="@+id/result_textview"
@@ -24,11 +24,40 @@
         android:id="@+id/scan_barcode_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/scan_barcode_button"
         android:layout_below="@id/result_textview"
         android:background="@color/colorAccent"
+        android:text="@string/scan_barcode_button"
         android:textColor="@color/colorWhite"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.7"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.596"
+        tools:layout_editor_absoluteX="0dp"
+        tools:ignore="MissingConstraints" />
+
+    <Button
+        android:id="@+id/generate_qr"
+        android:layout_width="442dp"
+        android:layout_height="53dp"
+        android:layout_below="@id/scan_barcode_button"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/colorAccent"
+        android:text="@string/generate_qr_button"
+        android:textColor="@color/colorWhite"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.699" />
+
+    <EditText
+        android:id="@+id/TextBox"
+        android:layout_below="@id/generate_qr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="@string/enterText"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:layout_editor_absoluteY="374dp"
+        tools:ignore="MissingConstraints" />
 </android.support.constraint.ConstraintLayout>
