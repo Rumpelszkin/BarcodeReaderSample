@@ -2,15 +2,26 @@ package com.varvet.barcodereadersample;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.eatthepath.otp.TimeBasedOneTimePasswordGenerator;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+
+import java.io.ByteArrayInputStream;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 
 public class Main2Activity extends AppCompatActivity {
 
@@ -26,17 +37,64 @@ public class Main2Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
+
+
+// Don't permit screenshots since it contains the secret key
+      //  getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,WindowManager.LayoutParams.FLAG_SECURE);
         Intent i = getIntent();
-        String text = i.getStringExtra ("TextBox");
+
+
+        TimeBasedOneTimePasswordGenerator totp = null;
+        try {
+            totp = new TimeBasedOneTimePasswordGenerator();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        final SecretKey secretKey;
+        {
+            KeyGenerator keyGenerator = null;//timeBasedOneTimePasswordGenerator.getAlgorithm());
+            try {
+                keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+  /*          try {
+                keyGenerator = KeyGenerator.getInstance("AES");
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }*/
+            keyGenerator.init(512);
+            secretKey = keyGenerator.generateKey();
+        }
+        String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+        byte[] encoded = secretKey.getEncoded();
+
+        String s = new String(encoded);
+       // System.out.println("Text Decryted : " + s);
+
+
+        //String text = i.getStringExtra ("TextBox");
+
+
+
 
         ImageView imageView = (ImageView) findViewById(R.id.myImage);
         try{
-            Bitmap bitmap = encodeAsBitmap(text);
+            Bitmap bitmap = encodeAsBitmap(encodedKey);//ByteArrayToBitmap(encoded);
             imageView.setImageBitmap(bitmap);
         }catch(Exception e){
             e.printStackTrace();
         }
     }
+
+    public Bitmap ByteArrayToBitmap(byte[] byteArray)
+    {
+        ByteArrayInputStream arrayInputStream = new ByteArrayInputStream(byteArray);
+        Bitmap bitmap = BitmapFactory.decodeStream(arrayInputStream);
+        return bitmap;
+    }
+
 
     Bitmap encodeAsBitmap(String str) throws WriterException {
         BitMatrix result;

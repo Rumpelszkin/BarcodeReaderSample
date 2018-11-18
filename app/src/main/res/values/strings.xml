@@ -13,4 +13,8 @@
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
     <string name="generate_qr_button">QR</string>
     <string name="enterText">Enter cipher Key</string>
+    <string name="add">Add New</string>
+    <string name="buttonQR">generateKey</string>
+    <string name="buttonSCAN">scanKey</string>
+    <string name="addContactName">new contact name</string>
 </resources>

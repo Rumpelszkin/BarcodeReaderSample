@@ -1,1 +1,1 @@
-include ':app'
+include ':app' , 'java-otp-0.1.0-javadoc.jar'
