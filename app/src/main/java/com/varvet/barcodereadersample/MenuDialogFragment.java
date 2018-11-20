@@ -33,10 +33,10 @@ public class MenuDialogFragment extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // Get field from view
-        Button button2 = (Button) view.findViewById(R.id.button2);
-        Button button3 = (Button) view.findViewById(R.id.button3);
+        Button buttonScanKey = (Button) view.findViewById(R.id.generateKey);
+        Button buttonGenerateKey = (Button) view.findViewById(R.id.scanKey);
 
-        button2.setOnClickListener(new View.OnClickListener(){
+        buttonScanKey.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v){
@@ -47,7 +47,7 @@ public class MenuDialogFragment extends DialogFragment {
             }}
         );
 
-        button3.setOnClickListener(new View.OnClickListener(){
+        buttonGenerateKey.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v){
