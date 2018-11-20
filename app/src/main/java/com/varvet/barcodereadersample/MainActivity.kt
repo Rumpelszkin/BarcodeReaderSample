@@ -75,18 +75,15 @@ class MainActivity : AppCompatActivity() {
         myContactsListView = findViewById(R.id.myContactsListView)
 
 
-        val string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string","dupa")
-       // var contactsList = getArrayListFromJson(string)
-        //var adapter = ContactAdapter(contactsList)
+        val string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string","[]")
+        var contactsList = getArrayListFromJson(string)
+
+        if(contactsList!=null) {
+            var adapter = ContactAdapter(contactsList)
+        }
 
 
-var contactList = ArrayList<String>()
-        contactList.add("cyce")
-        contactList.add("cyce")
-        contactList.add("cyce")
-        contactList.add("cyce")
-
-        listViewAdapter = ArrayAdapter<String>(this,R.layout.row,contactList)
+        listViewAdapter = ArrayAdapter<String>(this,R.layout.row,contactsList)
         myContactsListView.adapter = listViewAdapter
 
         mResultTextView = findViewById(R.id.textView)
@@ -96,29 +93,23 @@ var contactList = ArrayList<String>()
             showMenuDialog()
 
         }
-      /*  findViewById<Button>(R.id.button).setOnClickListener{
-            val builder = AlertDialog.Builder(this@MainActivity)
-
-            builder.setTitle("Wiadomosc 1")
-
-            builder.setMessage("Wiadomosc 2")
-
-            builder.setPositiveButton("QR"){dialog, which ->
-                val intent = Intent(applicationContext, Main2Activity::class.java)
-                //intent.putExtra("TextBox",editText.getText().toString());
-                startActivityForResult(intent, BARCODE_READER_REQUEST_CODE)
-            }
-            builder.setNegativeButton("SCAN"){dialog,which ->
-                val intent = Intent(applicationContext, BarcodeCaptureActivity::class.java)
-                startActivityForResult(intent, BARCODE_READER_REQUEST_CODE)
-            }
-            val dialog: AlertDialog = builder.create()
-            dialog.show()*/
     }
 
 
     override fun onResume() {
         super.onResume()
+        val string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string","[]")
+        var contactsList = getArrayListFromJson(string)
+
+        if(contactsList!=null) {
+            var adapter = ContactAdapter(contactsList)
+        }
+
+
+        listViewAdapter = ArrayAdapter<String>(this,R.layout.row,contactsList)
+        myContactsListView.adapter = listViewAdapter
+
+
     }
 
     override fun onPause() {
@@ -143,7 +134,8 @@ override fun onDestroy() {
      super.onDestroy()
  }
 
- fun getArrayListFromJson(Json: String): ArrayList<String> {
+ fun getArrayListFromJson(Json: String): ArrayList<String>? {
+     if(Json.equals("{}")) return null
      val listType = TypeToken.getParameterized(ArrayList::class.java, String::class.java).type
      val x: ArrayList<String> = Gson().fromJson(Json, listType)
      return x
@@ -185,14 +177,19 @@ override fun onDestroy() {
      else if (requestCode == ADD_CONTACT_REQUEST){
          if(resultCode == Activity.RESULT_OK){
              if(data!=null){
-                 var string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string","dupa")
+                 var string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string","[]")
                  var contactsList = getArrayListFromJson(string)
-                 var adapter = ContactAdapter(contactsList)
 
-                 adapter.addItem("messenger")
+                 if(contactsList!=null){
+                     var adapter = ContactAdapter(contactsList)
 
-                 mResultTextView.text = data.extras.getString("newName")
+
+                 adapter.addItem(data.extras.getString("messenger"))}
+
+                 mResultTextView.text = string
                  mResultTextView2.text = data.extras.getString("messenger")
+
+
              }
          }
 
