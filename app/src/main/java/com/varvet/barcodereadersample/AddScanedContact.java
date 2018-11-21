@@ -31,12 +31,14 @@ public class AddScanedContact extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                String temp1 = getIntent().getStringExtra("newName");
 
                 Intent intent = new Intent();
 
 
                 intent.putExtra(QR_CODE_KEY,foo);
-                intent.putExtra("messenger",editText.getText().toString());
+
+                intent.putExtra("messenger",editText.getText().toString()+"<...>"+temp1);
                 setResult(Activity.RESULT_OK,intent);
                 finish();
 

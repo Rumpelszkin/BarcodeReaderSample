@@ -23,6 +23,8 @@ import org.json.JSONObject
 import javax.sql.CommonDataSource
 import android.content.SharedPreferences
 import com.varvet.barcodereadersample.utils.toJson
+import devliving.online.securedpreferencestore.DefaultRecoveryHandler
+import devliving.online.securedpreferencestore.SecuredPreferenceStore
 
 
 class MainActivity : AppCompatActivity() {
@@ -35,12 +37,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mResultTextView2: TextView
     private lateinit var myContactsListView: ListView
     private lateinit var listViewAdapter:ArrayAdapter<String>
-/*
-    private lateinit var string: String
-    private lateinit var contactsList :ArrayList<String>
-    private lateinit var  adapter : ContactAdapter
-*/
 
+
+    val storeFileName = "securedStore";
+
+    val keyPrefix = "vss";
+//it's better to provide one, and you need to provide the same key each time after the first time
+    val seedKey: ByteArray = "SecuredSeedData".toByteArray();
 
     companion object {
         const val QR_CODE_KEY = "pwr_krol"
@@ -72,6 +75,9 @@ class MainActivity : AppCompatActivity() {
         }
 */
         setContentView(R.layout.activity_main)
+        SecuredPreferenceStore.init(getApplicationContext(), storeFileName, keyPrefix, seedKey, DefaultRecoveryHandler());
+
+
         myContactsListView = findViewById(R.id.myContactsListView)
 
 
@@ -94,7 +100,6 @@ class MainActivity : AppCompatActivity() {
 
         }
     }
-
 
     override fun onResume() {
         super.onResume()
@@ -134,20 +139,20 @@ override fun onDestroy() {
      super.onDestroy()
  }
 
- fun getArrayListFromJson(Json: String): ArrayList<String>? {
+     fun getArrayListFromJson(Json: String): ArrayList<String>? {
      if(Json.equals("{}")) return null
      val listType = TypeToken.getParameterized(ArrayList::class.java, String::class.java).type
      val x: ArrayList<String> = Gson().fromJson(Json, listType)
      return x
  }
 
- private fun showMenuDialog(){
+    private fun showMenuDialog(){
      val pop = MenuDialogFragment()
      val fm = fragmentManager
      pop.show(fm,"name")
  }
 
- override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
 
      if (requestCode == BARCODE_READER_REQUEST_CODE) {
              if (resultCode == CommonStatusCodes.SUCCESS) {
@@ -158,7 +163,7 @@ override fun onDestroy() {
 
                      val intent = Intent(applicationContext, AddScanedContact::class.java)
 
-                     intent.putExtra("newName",barcode.displayValue.toString()+"kurlaRumpi");
+                     intent.putExtra("newName",barcode.displayValue.toString());
 
 
                      startActivityForResult(intent, ADD_CONTACT_REQUEST)
@@ -177,17 +182,24 @@ override fun onDestroy() {
      else if (requestCode == ADD_CONTACT_REQUEST){
          if(resultCode == Activity.RESULT_OK){
              if(data!=null){
-                 var string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string","[]")
+                 var string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string","[]")//dostep do SH
                  var contactsList = getArrayListFromJson(string)
+
+
 
                  if(contactsList!=null){
                      var adapter = ContactAdapter(contactsList)
+                     val str = data.extras.getString("messenger")
+                     val ou = str.split("<...>")
+                    adapter.addItem(ou[0])
+
+                     val prefStore = SecuredPreferenceStore.getSharedInstance()
+                     prefStore.edit().putString(ou[0],ou[1]).apply()
+                 }
 
 
-                 adapter.addItem(data.extras.getString("messenger"))}
-
-                 mResultTextView.text = string
-                 mResultTextView2.text = data.extras.getString("messenger")
+//                 mResultTextView.text = ou[0]
+  //               mResultTextView2.text = ou[1]
 
 
              }
@@ -198,27 +210,16 @@ override fun onDestroy() {
 
 
 
-     /* if (requestCode == ADD_CONTACT_REQUEST) {
-          if (resultCode == Activity.RESULT_OK) {
-             val task = TaskDescriptionActivity.getNewTask(data)
-              task?.let {
-                  contactsList.add(task)
-                  adapter.notifyDataSetChanged()
-              }
-          }
-      }*/
-
-
  }
 
- private fun makeAdapter(list: List<String>): ArrayAdapter<String> =
+     private fun makeAdapter(list: List<String>): ArrayAdapter<String> =
          ArrayAdapter(this, android.R.layout.simple_list_item_1, list)
 
- override fun onConfigurationChanged(newConfig: Configuration?) {
-     super.onConfigurationChanged(newConfig)
- }
+     override fun onConfigurationChanged(newConfig: Configuration?) {
+         super.onConfigurationChanged(newConfig)
+        }
 
- inner class ContactAdapter(private val contactsList: ArrayList<String>):BaseAdapter(){
+    inner class ContactAdapter(private val contactsList: ArrayList<String>):BaseAdapter(){
 
      override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
          val row = layoutInflater.inflate(R.layout.layout_main,parent, false)
