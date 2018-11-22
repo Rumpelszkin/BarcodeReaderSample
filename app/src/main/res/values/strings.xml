@@ -17,4 +17,6 @@
     <string name="buttonQR">generateKey</string>
     <string name="buttonSCAN">scanKey</string>
     <string name="addContactName">new contact name</string>
+    <string name="buttonENCODE">SZYFRUJ</string>
+    <string name="buttonDECODE">DESZYFRUJ</string>
 </resources>

@@ -2,6 +2,6 @@
     android:id="@+id/row"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:textSize="15dp"
-    android:onClick="pokaKlucza">
+    android:textSize="30sp"
+    >
     </TextView>

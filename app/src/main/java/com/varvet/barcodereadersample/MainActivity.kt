@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     val storeFileName = "securedStore";
 
     val keyPrefix = "vss";
-//it's better to provide one, and you need to provide the same key each time after the first time
+    //it's better to provide one, and you need to provide the same key each time after the first time
     val seedKey: ByteArray = "SecuredSeedData".toByteArray();
 
     companion object {
@@ -55,31 +55,27 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-     /*   setContentView(R.layout.activity_main)
 
-        mResultTextView = findViewById(R.id.result_textview)
-        editText = findViewById(R.id.TextBox);
-
-
-
-
-
-        findViewById<Button>(R.id.scan_barcode_button).setOnClickListener {
-            val intent = Intent(applicationContext, BarcodeCaptureActivity::class.java)
-            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE)
-        }
-        findViewById<Button>(R.id.generate_qr).setOnClickListener {
-            val intent = Intent(applicationContext, Main2Activity::class.java)
-            intent.putExtra("TextBox",editText.getText().toString());
-            startActivityForResult(intent, BARCODE_READER_REQUEST_CODE)
-        }
-*/
         setContentView(R.layout.activity_main)
         SecuredPreferenceStore.init(getApplicationContext(), storeFileName, keyPrefix, seedKey, DefaultRecoveryHandler());
-
-
+        val prefStore = SecuredPreferenceStore.getSharedInstance()
         myContactsListView = findViewById(R.id.myContactsListView)
 
+        myContactsListView.setOnItemClickListener{parent, view, position, id ->
+
+
+            val xd =prefStore.getString(listViewAdapter.getItem(position),null)
+
+           // Toast.makeText(this, listViewAdapter.getItem(position) + " " + xd,Toast.LENGTH_SHORT).show()
+            val fm = fragmentManager
+            val dialogFragment = CipherMenuDialog()
+            var args = Bundle()
+            args!!.putString("name",listViewAdapter.getItem(position))
+            args!!.putString("key", xd)
+            dialogFragment.setArguments(args)
+            dialogFragment.show(fm,"CIPHER_FRAGMENT")
+
+        }
 
         val string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string","[]")
         var contactsList = getArrayListFromJson(string)
@@ -92,8 +88,6 @@ class MainActivity : AppCompatActivity() {
         listViewAdapter = ArrayAdapter<String>(this,R.layout.row,contactsList)
         myContactsListView.adapter = listViewAdapter
 
-        mResultTextView = findViewById(R.id.textView)
-        mResultTextView2 = findViewById(R.id.textView2)
 
         findViewById<Button>(R.id.button).setOnClickListener{
             showMenuDialog()
@@ -123,16 +117,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
     super.onStop()
-/*       //Save all contacts names
-     val savedList = StringBuilder()
-/*     for (contact in contactsList) {
-         savedList.append(contact)
-         savedList.append(",")
-     }*/
-
-     getSharedPreferences(PREFS_CONTACTS, Context.MODE_PRIVATE).edit()
-             .putString(KEY_CONTACTS, savedList.toString()).apply()
-*/
  }
 
 override fun onDestroy() {
@@ -164,14 +148,7 @@ override fun onDestroy() {
                      val intent = Intent(applicationContext, AddScanedContact::class.java)
 
                      intent.putExtra("newName",barcode.displayValue.toString());
-
-
                      startActivityForResult(intent, ADD_CONTACT_REQUEST)
-
-
-
-                     mResultTextView.text = barcode.displayValue //<--- klucz przekazany
-                     mResultTextView2.text = data.getStringExtra("message")
 
                  } else
                      mResultTextView.setText(R.string.no_barcode_captured)
@@ -196,12 +173,6 @@ override fun onDestroy() {
                      val prefStore = SecuredPreferenceStore.getSharedInstance()
                      prefStore.edit().putString(ou[0],ou[1]).apply()
                  }
-
-
-//                 mResultTextView.text = ou[0]
-  //               mResultTextView2.text = ou[1]
-
-
              }
          }
 
