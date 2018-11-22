@@ -1,12 +1,16 @@
 package com.varvet.barcodereadersample;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.eatthepath.otp.TimeBasedOneTimePasswordGenerator;
@@ -32,6 +36,9 @@ public class Main2Activity extends AppCompatActivity {
     public final static int HEIGHT = 400;
     public final static String STR = "HEHEHEHE DUPA";
 
+    Button button;
+    EditText editText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +50,8 @@ public class Main2Activity extends AppCompatActivity {
       //  getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,WindowManager.LayoutParams.FLAG_SECURE);
         Intent i = getIntent();
 
-
+        button = (Button) findViewById(R.id.button);
+        editText = (EditText) findViewById(R.id.editText2) ;
         TimeBasedOneTimePasswordGenerator totp = null;
         try {
             totp = new TimeBasedOneTimePasswordGenerator();
@@ -59,33 +67,42 @@ public class Main2Activity extends AppCompatActivity {
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-  /*          try {
-                keyGenerator = KeyGenerator.getInstance("AES");
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }*/
+
             keyGenerator.init(512);
             secretKey = keyGenerator.generateKey();
         }
-        String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
+        final String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
         byte[] encoded = secretKey.getEncoded();
 
         String s = new String(encoded);
-       // System.out.println("Text Decryted : " + s);
-
-
-        //String text = i.getStringExtra ("TextBox");
-
-
-
 
         ImageView imageView = (ImageView) findViewById(R.id.myImage);
         try{
-            Bitmap bitmap = encodeAsBitmap(encodedKey);//ByteArrayToBitmap(encoded);
+            Bitmap bitmap = encodeAsBitmap(encodedKey);//ByteArrayToBitmap(encoded); <------ encodedKey to jest kurcze Klucz w stringu
             imageView.setImageBitmap(bitmap);
         }catch(Exception e){
             e.printStackTrace();
         }
+
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               Intent intent = new Intent();
+               intent.putExtra("messenger",editText.getText().toString()+"<...>"+encodedKey);
+                setResult(Activity.RESULT_OK,intent);
+                finish();
+
+
+
+
+
+
+
+            }
+        });
+
+
+
     }
 
     public Bitmap ByteArrayToBitmap(byte[] byteArray)

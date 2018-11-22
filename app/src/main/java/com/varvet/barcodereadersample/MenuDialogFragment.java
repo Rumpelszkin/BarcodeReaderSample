@@ -53,7 +53,7 @@ public class MenuDialogFragment extends DialogFragment {
             public void onClick(View v){
 
                 Intent i = new Intent(getContext(), BarcodeCaptureActivity.class);
-                getActivity().startActivityForResult(i,1);
+                getActivity().startActivityForResult(i,2);
                 dismiss();
             }
         }
