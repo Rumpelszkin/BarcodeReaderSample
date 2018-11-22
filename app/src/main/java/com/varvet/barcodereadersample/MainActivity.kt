@@ -33,8 +33,6 @@ class MainActivity : AppCompatActivity() {
     private val KEY_CONTACTS = "contacts_list"
     private val ADD_CONTACT_REQUEST = 2
 
-    private lateinit var mResultTextView: TextView
-    private lateinit var mResultTextView2: TextView
     private lateinit var myContactsListView: ListView
     private lateinit var listViewAdapter:ArrayAdapter<String>
 
@@ -150,8 +148,7 @@ override fun onDestroy() {
                      intent.putExtra("newName",barcode.displayValue.toString());
                      startActivityForResult(intent, ADD_CONTACT_REQUEST)
 
-                 } else
-                     mResultTextView.setText(R.string.no_barcode_captured)
+                 }
              } else
                  Log.e(LOG_TAG, String.format(getString(R.string.barcode_error_format),
                          CommonStatusCodes.getStatusCodeString(resultCode)))
