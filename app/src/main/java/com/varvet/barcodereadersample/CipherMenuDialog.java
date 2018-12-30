@@ -1,5 +1,6 @@
 package com.varvet.barcodereadersample;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -63,6 +64,7 @@ public class CipherMenuDialog extends DialogFragment {
             @Override
             public void onClick(View v){
                 Toast.makeText(getContext(), name + " " +key,Toast.LENGTH_SHORT).show();
+                ((MainActivity)getActivity()).getUri();
             }
         });
 

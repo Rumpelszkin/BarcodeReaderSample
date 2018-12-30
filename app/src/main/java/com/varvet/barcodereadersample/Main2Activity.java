@@ -34,7 +34,7 @@ public class Main2Activity extends AppCompatActivity {
     public final static int BLACK = 0xFF000000;
     public final static int WIDTH = 400;
     public final static int HEIGHT = 400;
-    public final static String STR = "HEHEHEHE DUPA";
+
 
     Button button;
     EditText editText;
@@ -91,13 +91,6 @@ public class Main2Activity extends AppCompatActivity {
                intent.putExtra("messenger",editText.getText().toString()+"<...>"+encodedKey);
                 setResult(Activity.RESULT_OK,intent);
                 finish();
-
-
-
-
-
-
-
             }
         });
 

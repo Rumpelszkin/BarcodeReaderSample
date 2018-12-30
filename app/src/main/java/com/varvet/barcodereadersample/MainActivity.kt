@@ -22,9 +22,18 @@ import com.varvet.barcodereadersample.barcode.BarcodeCaptureActivity
 import org.json.JSONObject
 import javax.sql.CommonDataSource
 import android.content.SharedPreferences
+import android.net.Uri
+import com.varvet.barcodereadersample.utils.CipherClass
 import com.varvet.barcodereadersample.utils.toJson
 import devliving.online.securedpreferencestore.DefaultRecoveryHandler
 import devliving.online.securedpreferencestore.SecuredPreferenceStore
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
+import java.net.URI
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private val PREFS_CONTACTS = "prefs_contacts"
     private val KEY_CONTACTS = "contacts_list"
     private val ADD_CONTACT_REQUEST = 2
+    private val GET_FILE_URI_REQUEST = 531
 
     private lateinit var myContactsListView: ListView
     private lateinit var listViewAdapter:ArrayAdapter<String>
@@ -48,13 +58,13 @@ class MainActivity : AppCompatActivity() {
         private val LOG_TAG = MainActivity::class.java.simpleName
         private val BARCODE_READER_REQUEST_CODE = 1
         private val ADD_NEW_CONTACT = 2
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContentView(R.layout.activity_main)
+
+        //getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).edit().clear().commit()
         SecuredPreferenceStore.init(getApplicationContext(), storeFileName, keyPrefix, seedKey, DefaultRecoveryHandler());
         val prefStore = SecuredPreferenceStore.getSharedInstance()
         myContactsListView = findViewById(R.id.myContactsListView)
@@ -147,38 +157,71 @@ override fun onDestroy() {
 
                      intent.putExtra("newName",barcode.displayValue.toString());
                      startActivityForResult(intent, ADD_CONTACT_REQUEST)
-
                  }
              } else
                  Log.e(LOG_TAG, String.format(getString(R.string.barcode_error_format),
                          CommonStatusCodes.getStatusCodeString(resultCode)))
          }
      else if (requestCode == ADD_CONTACT_REQUEST){
-         if(resultCode == Activity.RESULT_OK){
-             if(data!=null){
-                 var string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string","[]")//dostep do SH
+         if(resultCode == Activity.RESULT_OK) {
+             if (data != null) {
+                 var string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string", "[]")//dostep do SH
                  var contactsList = getArrayListFromJson(string)
 
 
 
-                 if(contactsList!=null){
+                 if (contactsList != null) {
                      var adapter = ContactAdapter(contactsList)
                      val str = data.extras.getString("messenger")
                      val ou = str.split("<...>")
-                    adapter.addItem(ou[0])
+                     adapter.addItem(ou[0])
 
                      val prefStore = SecuredPreferenceStore.getSharedInstance()
-                     prefStore.edit().putString(ou[0],ou[1]).apply()
+                     prefStore.edit().putString(ou[0], ou[1]).apply()
+
                  }
+
              }
          }
 
+
      }else
+         if (requestCode == GET_FILE_URI_REQUEST && resultCode == Activity.RESULT_OK){
+             data?.data?.also { uri: Uri ->
+                 uri// to jest uri
+
+                 Log.d("elo","elo")//fileFromUri.toString());
+                 var cipher = CipherClass(uri);
+                 var sss = cipher.testBytes();
+                 Toast.makeText(this, sss ,Toast.LENGTH_SHORT).show()
+
+                 /*
+                 var fis = applicationContext.openFileInput(uri.toString())
+                 var inputStreamReader = InputStreamReader(fis)
+                 var bufferedReader = BufferedReader(inputStreamReader)
+                 var stringBuilder = StringBuilder()
+                 var line : String? = bufferedReader.readLine()
+                 while(line != null){
+                     stringBuilder.append(line)
+                     line = bufferedReader.readLine()
+                     Log.d("elo", stringBuilder.toString())
+                 }*/
+                 Log.d("elo", "elo2")
+
+             }
+         }
+             else
          super.onActivityResult(requestCode, resultCode, data)
 
 
 
  }
+    fun getUri(){
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        intent.addCategory(Intent.CATEGORY_OPENABLE)
+        intent.type = "text/*"
+        startActivityForResult(intent, GET_FILE_URI_REQUEST)
+    }
 
      private fun makeAdapter(list: List<String>): ArrayAdapter<String> =
          ArrayAdapter(this, android.R.layout.simple_list_item_1, list)

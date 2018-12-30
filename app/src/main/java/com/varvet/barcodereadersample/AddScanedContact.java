@@ -36,7 +36,7 @@ public class AddScanedContact extends AppCompatActivity {
                 Intent intent = new Intent();
 
 
-              //  intent.putExtra(QR_CODE_KEY,foo);
+               intent.putExtra(QR_CODE_KEY,foo);
 
                 intent.putExtra("messenger",editText.getText().toString()+"<...>"+temp1);
                 setResult(Activity.RESULT_OK,intent);

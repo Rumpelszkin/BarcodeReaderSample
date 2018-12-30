@@ -4,6 +4,7 @@ import android.app.DialogFragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +37,7 @@ public class MenuDialogFragment extends DialogFragment {
         Button buttonScanKey = (Button) view.findViewById(R.id.generateKey);
         Button buttonGenerateKey = (Button) view.findViewById(R.id.scanKey);
 
-        buttonScanKey.setOnClickListener(new View.OnClickListener(){
+        buttonGenerateKey.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v){
@@ -47,13 +48,13 @@ public class MenuDialogFragment extends DialogFragment {
             }}
         );
 
-        buttonGenerateKey.setOnClickListener(new View.OnClickListener(){
+        buttonScanKey.setOnClickListener(new View.OnClickListener(){
 
             @Override
             public void onClick(View v){
 
                 Intent i = new Intent(getContext(), BarcodeCaptureActivity.class);
-                getActivity().startActivityForResult(i,2);
+                getActivity().startActivityForResult(i,1);
                 dismiss();
             }
         }
