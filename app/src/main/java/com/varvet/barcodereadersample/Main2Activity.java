@@ -47,7 +47,7 @@ public class Main2Activity extends AppCompatActivity {
 
 
 // Don't permit screenshots since it contains the secret key
-      //  getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,WindowManager.LayoutParams.FLAG_SECURE);
+       getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,WindowManager.LayoutParams.FLAG_SECURE);
         Intent i = getIntent();
 
         button = (Button) findViewById(R.id.button);
@@ -68,7 +68,7 @@ public class Main2Activity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            keyGenerator.init(512);
+            keyGenerator.init(256);
             secretKey = keyGenerator.generateKey();
         }
         final String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
