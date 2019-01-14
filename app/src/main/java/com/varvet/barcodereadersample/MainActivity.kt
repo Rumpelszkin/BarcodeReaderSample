@@ -1,5 +1,6 @@
 package com.varvet.barcodereadersample
 
+import android.Manifest
 import android.app.Activity
 import android.app.FragmentManager
 import android.content.Context
@@ -22,11 +23,14 @@ import com.varvet.barcodereadersample.barcode.BarcodeCaptureActivity
 import org.json.JSONObject
 import javax.sql.CommonDataSource
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Environment
 import android.provider.OpenableColumns
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.ActivityCompat.startActivityForResult
+import android.support.v4.content.ContextCompat
 import com.varvet.barcodereadersample.utils.CipherClass
 import com.varvet.barcodereadersample.utils.PathUtil.getPath
 import com.varvet.barcodereadersample.utils.toJson
@@ -37,6 +41,7 @@ import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.math.E
 
 
 class MainActivity : AppCompatActivity() {
@@ -66,6 +71,8 @@ class MainActivity : AppCompatActivity() {
         private val ADD_NEW_CONTACT = 2
     }
 
+ //   public lateinit var mContext: Context
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -73,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         //getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).edit().clear().commit()
         SecuredPreferenceStore.init(getApplicationContext(), storeFileName, keyPrefix, seedKey, DefaultRecoveryHandler());
         val prefStore = SecuredPreferenceStore.getSharedInstance()
+     //   mContext = getContext()
         myContactsListView = findViewById(R.id.myContactsListView)
 
         myContactsListView.setOnItemClickListener { parent, view, position, id ->
@@ -196,17 +204,22 @@ class MainActivity : AppCompatActivity() {
                 data?.data?.also { uri: Uri ->
                     //uri// to jest uri
                     val file = File(uri.getPath()) //create path from uri
-                    Log.d("elo123", uri.toString())//fileFromUri.toString());
+                    Log.d("testGetUriString", uri.toString())//fileFromUri.toString());
                     val split = uri.toString().split(":") //split the path.
                     val filePath = split[1];//assign it to a string(your choice).
-                    Log.d("elo", filePath)//fileFromUri.toString());
+                    Log.d("testEloPathELO", filePath)//fileFromUri.toString());
                     var paczka = intent.extras
                     var klucz = key//paczka.getString("key")
                     Log.e("test",Integer.toString(tryb))
 //                    var tryb = paczka.getInt("tryb")
 
-                    var CipherClass = CipherClass(uri, applicationContext, klucz, tryb)//edit
+                    if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) run {
 
+                        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+                    } else {
+
+                        var CipherClass = CipherClass(uri, applicationContext, klucz, tryb)//edit
+                    }
 
 
                     readUri(uri)
@@ -221,7 +234,10 @@ class MainActivity : AppCompatActivity() {
     fun getUri(key : String,  tryb: Int) {// cipher = 1 // decipher = 2
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
         intent.addCategory(Intent.CATEGORY_OPENABLE)
+
+
         intent.type = "text/*"
+        //intent.type = "*/*"
         this.key = key;
         this.tryb = tryb;
         intent.putExtra("key",key)
@@ -250,12 +266,14 @@ class MainActivity : AppCompatActivity() {
 //            val size = Long.toString(returnCursor.getLong(sizeIndex));
         }
        // val fileSave = getExternalFilesDir(null);
-        //val sourcePath = "/data/user/0/Downloads/rmp" //getFilesDir().toString();
-        val sourcePath = getExternalFilesDir(null).toString();
+        val sourcePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
+       // val sourcePath = getExternalFilesDir(null).toString(); /// ----TUTAAAJ 1
+
+
        // val sourcePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
         try {
             Log.d("testtest", sourcePath)
-            var tekstDoOdszyfrowania = copyFileStream(File(sourcePath + "/xxx"+ filename), uri, this);
+      //      var tekstDoOdszyfrowania = copyFileStream(File(sourcePath + "/xxx"+ filename), uri, this);
 
         } catch (e: java.lang.Exception) {
             e.printStackTrace();
@@ -265,11 +283,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun copyFileStream(dest: File, uri: Uri, context: Context): ByteArray? {
         var `is`: InputStream? = null
-        var os: OutputStream? = null
+   //     var os: OutputStream? = null
         var bajtaraj : ByteArray? = null
         try {
             `is` = context.contentResolver.openInputStream(uri)
-            os = FileOutputStream(dest)
+          //  os = FileOutputStream(dest)
             val buffer = ByteArray(1024)
 
             bajtaraj = ByteArray(`is`.available())
@@ -294,10 +312,14 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         } finally {
             `is`!!.close()
-            os!!.close()
+         //   os!!.close()
             return bajtaraj
         }
     }
+
+  /*  public fun getContext(): Context{
+        return mContext;
+    }*/
 
     private fun makeAdapter(list: List<String>): ArrayAdapter<String> =
             ArrayAdapter(this, android.R.layout.simple_list_item_1, list)

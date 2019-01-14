@@ -1,9 +1,15 @@
 package com.varvet.barcodereadersample.utils;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.OpenableColumns;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.eatthepath.otp.TimeBasedOneTimePasswordGenerator;
@@ -42,6 +48,7 @@ public class CipherClass {
     String filePath;
     String key;
     int tryb;
+    Context context;
 
     public CipherClass(Uri uri,Context context, String key, int tryb) throws URISyntaxException {
         //file = new File(PathUtil.getPath(context, uri));
@@ -54,7 +61,7 @@ public class CipherClass {
 */      this.key = key;
         this.tryb = tryb;
         readFromUri(uri, context);
-
+        this.context=context;
 
 
         Log.d("cipher1","elo");
@@ -84,16 +91,18 @@ public class CipherClass {
             filename = returnCursor.getString(nameIndex);
         }
 
-         String sourcePath = context.getExternalFilesDir(null).toString();
+         //String sourcePath = context.getExternalFilesDir(null).toString();
+        String sourcePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString();
+        Log.d("testPathInfo", sourcePath);
 
         try{
-           // Log.d("testtest",sourcePath);
+
             byte[] tekstDoObrobki = copyFileStream(new File(sourcePath+filename),uri,context);
 
             if(tryb == 1){
-                encrypt(tekstDoObrobki,new File(sourcePath+"/encoded"+filename));
+                encrypt(tekstDoObrobki,new File(sourcePath+"/zaszyfrowane"+filename));
             }else{
-                decrypt(tekstDoObrobki,new File(sourcePath+"/decoded"+filename));
+                decrypt(tekstDoObrobki,new File(sourcePath+"/odszfrowane"+filename));
             }
 
             return tekstDoObrobki;
@@ -118,12 +127,12 @@ public class CipherClass {
 
           // os.write(bajtaraj);
 
-          //  Log.d("testtest", new String(bajtaraj));
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             is.close();
-         //   os.close();
+
             return bajtaraj;
         }
 
@@ -189,15 +198,22 @@ public class CipherClass {
 
     //    byte[] dectypted = c2.doFinal(cipheredText);
 
-        outputStream = new FileOutputStream(file);
-        outputStream.write(finalCipheredText);
 
-        Log.e("test",new String(finalCipheredText));
 
-       // Log.e("test",new String(dectypted));
+
+       // outputStream.write(finalCipheredText);
+
+
+            outputStream = new FileOutputStream(file);
+            outputStream.write(finalCipheredText);
+
+
+        Log.e("testEncryptedText",new String(finalCipheredText));
+
+
 
         outputStream.close();
-        //ApplicationContext.showToast("Szyfrowanie zakończone powodzeniem!");
+        ApplicationContext.showToast("Szyfrowanie zakończone powodzeniem!");
 
 
         return false;
@@ -253,14 +269,15 @@ public class CipherClass {
         byte[] dectypted = c2.doFinal(encodedText);
 
         outputStream = new FileOutputStream(file);
-        outputStream.write(dectypted);
 
-        Log.e("test",new String(dectypted));
+ outputStream.write(dectypted);
+
+        Log.e("testCipheredText",new String(dectypted));
 
 
 
         outputStream.close();
-        ApplicationContext.showToast("Odszyfrowywanie zakończone powodzeniem!");
+        //ApplicationContext.showToast("Odszyfrowywanie zakończone powodzeniem!");
         return false;
     }
 
@@ -277,10 +294,7 @@ public class CipherClass {
         ByteBuffer buffer = ByteBuffer.wrap(bytes);
         buffer.order(ByteOrder.BIG_ENDIAN);
 
-    /*    ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
-        Log.e("test", new String(bytes));
-        buffer.put(bytes);
-        buffer.flip();//need flip*/
+
         return buffer.getLong();
     }
 }
