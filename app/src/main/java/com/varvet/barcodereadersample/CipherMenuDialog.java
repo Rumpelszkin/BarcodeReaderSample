@@ -40,19 +40,17 @@ public class CipherMenuDialog extends DialogFragment {
             Bundle myArgs = getArguments();
             name = myArgs.getString("name");
             key = myArgs.getString("key");
-
-
         }
 
     }
     @Override
     public void onResume(){
         super.onResume();
-      //  Toast.makeText(getContext(), "Operacja zakończona powodzeniem",Toast.LENGTH_LONG).show();
+       // Toast.makeText(getContext(), "Operacja zakończona powodzeniem",Toast.LENGTH_LONG).show();
     }
+
+
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-
-
         return inflater.inflate(R.layout.fragment_menu_cipher,container);
     }
 
@@ -61,9 +59,6 @@ public class CipherMenuDialog extends DialogFragment {
 
         Button buttonDECODE = (Button) view.findViewById(R.id.encode);
         Button buttonENCODE = (Button) view.findViewById(R.id.decode);
-
-
-
 
         buttonENCODE.setOnClickListener(new View.OnClickListener(){
             @Override

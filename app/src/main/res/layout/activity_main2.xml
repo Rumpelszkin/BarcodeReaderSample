@@ -35,7 +35,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp"
-        android:text="Nazwa kontaktu" />
+        android:text="@string/nazwaKontaktu"  />
 
 
 </RelativeLayout>

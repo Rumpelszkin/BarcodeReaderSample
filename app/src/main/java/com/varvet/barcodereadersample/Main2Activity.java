@@ -12,6 +12,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.eatthepath.otp.TimeBasedOneTimePasswordGenerator;
 import com.google.zxing.BarcodeFormat;
@@ -59,11 +60,14 @@ public class Main2Activity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+
+
         final SecretKey secretKey;
         {
             KeyGenerator keyGenerator = null;//timeBasedOneTimePasswordGenerator.getAlgorithm());
             try {
-                keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
+                //keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
+                keyGenerator = KeyGenerator.getInstance("AES");
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
@@ -89,6 +93,8 @@ public class Main2Activity extends AppCompatActivity {
             public void onClick(View v) {
                Intent intent = new Intent();
                intent.putExtra("messenger",editText.getText().toString()+"<...>"+encodedKey);
+              // Toast.makeText(getApplicationContext(),"Dodano kontakt: " + editText.getText().toString(),Toast.LENGTH_LONG).show();
+
                 setResult(Activity.RESULT_OK,intent);
                 finish();
             }

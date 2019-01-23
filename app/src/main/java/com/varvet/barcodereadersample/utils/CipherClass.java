@@ -11,6 +11,7 @@ import android.provider.OpenableColumns;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.eatthepath.otp.TimeBasedOneTimePasswordGenerator;
 import com.varvet.barcodereadersample.MainActivity;
@@ -101,8 +102,10 @@ public class CipherClass {
 
             if(tryb == 1){
                 encrypt(tekstDoObrobki,new File(sourcePath+"/zaszyfrowane"+filename));
+                Toast.makeText(context,"Zaszyfrowano: "+ filename,Toast.LENGTH_LONG).show();
             }else{
                 decrypt(tekstDoObrobki,new File(sourcePath+"/odszfrowane"+filename));
+                Toast.makeText(context,"Odszyfrowano: "+ filename,Toast.LENGTH_LONG).show();
             }
 
             return tekstDoObrobki;
@@ -121,12 +124,9 @@ public class CipherClass {
         try{
             is = context.getContentResolver().openInputStream(uri);
          //   os = new FileOutputStream(dest);
-
             bajtaraj = new byte[is.available()];
             is.read(bajtaraj);
-
-          // os.write(bajtaraj);
-
+          // os.write(bajtaraj)z
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -158,7 +158,10 @@ public class CipherClass {
         TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator();
         byte[] decodedKey = Base64.getDecoder().decode(key);
 // rebuild key using SecretKeySpec
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, totp.getAlgorithm());
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length,"AES");// totp.getAlgorithm());
+
+
+       Log.e("testKey",new String(decodedKey));
 
         Calendar cal = Calendar.getInstance();//data to token
         Date act = cal.getTime();
@@ -167,7 +170,7 @@ public class CipherClass {
 
         int token = totp.generateOneTimePassword(originalKey,act);
         String xx =  Integer.toString(token);
-        Log.e("token", xx);
+        Log.e("length", Integer.toString(text.length));
 
         byte[] byteToken = xx.getBytes();
 
@@ -195,15 +198,8 @@ public class CipherClass {
 
   //      Cipher c2 = Cipher.getInstance("AES");
     //    c2.init(Cipher.DECRYPT_MODE,tempKey);
-
     //    byte[] dectypted = c2.doFinal(cipheredText);
-
-
-
-
        // outputStream.write(finalCipheredText);
-
-
             outputStream = new FileOutputStream(file);
             outputStream.write(finalCipheredText);
 
@@ -211,9 +207,9 @@ public class CipherClass {
         Log.e("testEncryptedText",new String(finalCipheredText));
 
 
-
+        //Toast.makeText(context,"Szyfrowanie zakończone powodzeniem.",Toast.LENGTH_LONG).show();
         outputStream.close();
-        ApplicationContext.showToast("Szyfrowanie zakończone powodzeniem!");
+        //ApplicationContext.showToast("Szyfrowanie zakończone powodzeniem!");
 
 
         return false;
@@ -221,11 +217,16 @@ public class CipherClass {
 
     public boolean decrypt(byte[] text,File file) throws Exception{
         OutputStream outputStream = null;
+        if((text.length-8)%16!=0) {
+            MainActivity.Companion.setTryb(-1);
+            return false;
+        }
         Cipher cipher = Cipher.getInstance("AES");
         TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator();
         byte[] decodedKey = Base64.getDecoder().decode(key);
+
 // rebuild key using SecretKeySpec
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, totp.getAlgorithm());
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");//totp.getAlgorithm());
 
         byte[] cipherTime = new byte[8];
 

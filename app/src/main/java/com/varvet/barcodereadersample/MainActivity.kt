@@ -2,7 +2,7 @@ package com.varvet.barcodereadersample
 
 import android.Manifest
 import android.app.Activity
-import android.app.FragmentManager
+import android.support.v4.app.FragmentManager
 import android.content.Context
 import android.content.*
 import android.content.Intent
@@ -42,6 +42,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import kotlin.math.E
+import kotlin.math.roundToInt
 
 
 class MainActivity : AppCompatActivity() {
@@ -52,7 +53,7 @@ class MainActivity : AppCompatActivity() {
     private val GET_FILE_URI_REQUEST = 531
 
     private var key = " ";
-    private var tryb = 1;
+
 
     private lateinit var myContactsListView: ListView
     private lateinit var listViewAdapter: ArrayAdapter<String>
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         private val LOG_TAG = MainActivity::class.java.simpleName
         private val BARCODE_READER_REQUEST_CODE = 1
         private val ADD_NEW_CONTACT = 2
+        public var tryb = 0
     }
 
  //   public lateinit var mContext: Context
@@ -77,9 +79,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) run {
+
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+        }
+
         //getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).edit().clear().commit()
-        SecuredPreferenceStore.init(getApplicationContext(), storeFileName, keyPrefix, seedKey, DefaultRecoveryHandler());
+        SecuredPreferenceStore.init(getApplicationContext(), storeFileName, keyPrefix, seedKey, DefaultRecoveryHandler())
         val prefStore = SecuredPreferenceStore.getSharedInstance()
+
+
+        //prefStore.edit().clear().commit()
+
      //   mContext = getContext()
         myContactsListView = findViewById(R.id.myContactsListView)
 
@@ -94,11 +105,84 @@ class MainActivity : AppCompatActivity() {
             var args = Bundle()
             args!!.putString("name", listViewAdapter.getItem(position))
             args!!.putString("key", xd)
-           // args!!.putString("")
+
+
             dialogFragment.setArguments(args)
             dialogFragment.show(fm, "CIPHER_FRAGMENT")
 
         }
+
+      myContactsListView.setOnItemLongClickListener { parent, view, position, id ->
+
+
+          val builder = AlertDialog.Builder(this@MainActivity)
+
+          // Set the alert dialog title
+          builder.setTitle("Usunięcie kontaktu")
+
+          // Display a message on alert dialog
+          builder.setMessage("Czy chcesz usunąć wybrany kontakt ?")
+
+          // Set a positive button and its click listener on alert dialog
+          builder.setPositiveButton("Tak"){dialog, which ->
+              // Do something when user press the positive button
+              Toast.makeText(applicationContext,"Kontakt został usunięty.",Toast.LENGTH_LONG).show()
+
+
+              val xd = prefStore.getString(listViewAdapter.getItem(position), null)
+
+              // Toast.makeText(this, listViewAdapter.getItem(position) + " " + xd,Toast.LENGTH_SHORT).show()
+              var string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string", "[]")//dostep do SH
+              var contactsList = getArrayListFromJson(string)
+              if(contactsList != null) {
+                  var adapter = ContactAdapter(contactsList)
+                  adapter.removeItem(listViewAdapter.getItem(position))
+              }
+              Log.e("test","pjona")
+              prefStore.edit().remove(listViewAdapter.getItem(position)).commit()
+
+              if (contactsList != null) {
+                  var adapter = ContactAdapter(contactsList)
+              }
+
+
+              listViewAdapter = ArrayAdapter<String>(this, R.layout.row, contactsList)
+              myContactsListView.adapter = listViewAdapter
+
+
+
+            //  finish()
+            //  startActivity(intent)
+
+
+
+          }
+
+
+          // Display a negative button on alert dialog
+          builder.setNegativeButton("Nie"){dialog,which ->
+              Toast.makeText(applicationContext,"Nie usunięto kontaktu.",Toast.LENGTH_LONG).show()
+          }
+
+
+      /*    // Display a neutral button on alert dialog
+          builder.setNeutralButton("Anuluj"){_,_ ->
+              Toast.makeText(applicationContext,"Wybór został anulowany.",Toast.LENGTH_LONG).show()
+          }
+*/
+          // Finally, make the alert dialog using builder
+          val dialog: AlertDialog = builder.create()
+
+          // Display the alert dialog on app interface
+          dialog.show()
+
+
+          true
+        }
+
+
+
+
 
         val string = this.getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE).getString("string", "[]")
         var contactsList = getArrayListFromJson(string)
@@ -115,6 +199,17 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.button).setOnClickListener {
             showMenuDialog()
 
+        }
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        if(tryb == 1 || tryb == 2){
+       // Toast.makeText(applicationContext,"Operacja zakończona POWODZENIEM.",Toast.LENGTH_LONG).show();
+        tryb =0}
+        else if(tryb == -1){
+            Toast.makeText(applicationContext,"Operacja zakończona NIEPOWODZENIEM. Niepoprawny rozmiar pliku.",Toast.LENGTH_LONG).show();
+            tryb =0
         }
     }
 
@@ -183,16 +278,28 @@ class MainActivity : AppCompatActivity() {
                     var contactsList = getArrayListFromJson(string)
 
 
-
                     if (contactsList != null) {
                         var adapter = ContactAdapter(contactsList)
                         val str = data.extras.getString("messenger")
                         val ou = str.split("<...>")
-                        adapter.addItem(ou[0])
 
-                        val prefStore = SecuredPreferenceStore.getSharedInstance()
-                        prefStore.edit().putString(ou[0], ou[1]).apply()
+                        if(adapter.itemExists(ou[0])) {
 
+                            var x = Math.random() * 100
+                        while(adapter.itemExists(ou[0]+ x.roundToInt().toString())){
+                            var x = Math.random() * 1000
+                        }
+
+                            adapter.addItem(ou[0]+x.roundToInt().toString())
+                            val prefStore = SecuredPreferenceStore.getSharedInstance()
+                            prefStore.edit().putString(ou[0]+x.roundToInt().toString(), ou[1]).apply()
+                            Toast.makeText(getApplicationContext(),"Dodany kontakt zawierał powtarzającą się nazwę, w celu zachowania ich unikalności dodano unikalny numer. Dodano nowy kontakt: " + ou[0]+x.roundToInt().toString()  ,Toast.LENGTH_LONG).show();
+                        }else{
+                            adapter.addItem(ou[0])
+                            val prefStore = SecuredPreferenceStore.getSharedInstance()
+                            prefStore.edit().putString(ou[0], ou[1]).apply()
+                            Toast.makeText(getApplicationContext(),"Dodano kontakt: " + ou[0] ,Toast.LENGTH_LONG).show();
+                        }
                     }
 
                 }
@@ -213,13 +320,13 @@ class MainActivity : AppCompatActivity() {
                     Log.e("test",Integer.toString(tryb))
 //                    var tryb = paczka.getInt("tryb")
 
-                    if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) run {
+                   if (ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) run {
 
                         ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
                     } else {
 
                         var CipherClass = CipherClass(uri, applicationContext, klucz, tryb)//edit
-                    }
+                   }
 
 
                     readUri(uri)
@@ -239,7 +346,7 @@ class MainActivity : AppCompatActivity() {
         intent.type = "text/*"
         //intent.type = "*/*"
         this.key = key;
-        this.tryb = tryb;
+        Companion.tryb = tryb
         intent.putExtra("key",key)
         intent.putExtra("tryb" , tryb)
         startActivityForResult(intent, GET_FILE_URI_REQUEST)
@@ -342,6 +449,15 @@ class MainActivity : AppCompatActivity() {
             sh.edit().putString("string", contactsList.toJson()).apply()
         }
 
+        fun removeItem(name: String){
+            contactsList.remove(name)
+            var sh = getSharedPreferences(KEY_CONTACTS, Context.MODE_PRIVATE)
+            sh.edit().putString("string", contactsList.toJson()).apply()
+        }
+
+        fun itemExists(name:String): Boolean{
+            return contactsList.contains(name)
+        }
         override fun getItem(position: Int): Any {
             return contactsList.get(position) //To change body of created functions use File | Settings | File Templates.
         }

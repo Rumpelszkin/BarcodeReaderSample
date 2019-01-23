@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import static com.varvet.barcodereadersample.MainActivity.QR_CODE_KEY;
 
@@ -35,10 +36,10 @@ public class AddScanedContact extends AppCompatActivity {
 
                 Intent intent = new Intent();
 
-
-               intent.putExtra(QR_CODE_KEY,foo);
+                 intent.putExtra(QR_CODE_KEY,foo);
 
                 intent.putExtra("messenger",editText.getText().toString()+"<...>"+temp1);
+            //    Toast.makeText(getApplicationContext(),"Dodano kontakt: " + editText.getText().toString(),Toast.LENGTH_LONG).show();
                 setResult(Activity.RESULT_OK,intent);
                 finish();
 

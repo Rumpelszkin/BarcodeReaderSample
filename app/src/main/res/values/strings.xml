@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RMPENTERPRISECIPHER</string>
+    <string name="app_name">RMP™ CIPHER</string>
 
     <!-- Strings related to MainActivity-->
     <string name="scan_barcode_button">Scan barcode</string>
@@ -13,10 +13,11 @@
     <string name="low_storage_error">Face detector dependencies cannot be downloaded due to low device storage</string>
     <string name="generate_qr_button">QR</string>
     <string name="enterText">Enter cipher Key</string>
-    <string name="add">Add new contact</string>
+    <string name="add">Dodaj nowy kontakt</string>
     <string name="buttonQR">Skanuj Klucz</string>
     <string name="buttonSCAN">Generuj Klucz</string>
     <string name="addContactName">new contact name</string>
+    <string name="nazwaKontaktu">Nazwa kontaktu</string>
     <string name="buttonENCODE">SZYFRUJ</string>
     <string name="buttonDECODE">DESZYFRUJ</string>
 </resources>
