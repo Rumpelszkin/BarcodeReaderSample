@@ -64,17 +64,17 @@ public class Main2Activity extends AppCompatActivity {
 
         final SecretKey secretKey;
         {
-            KeyGenerator keyGenerator = null;//timeBasedOneTimePasswordGenerator.getAlgorithm());
+            KeyGenerator keyGenerator = null;
             try {
-                //keyGenerator = KeyGenerator.getInstance(totp.getAlgorithm());
-                keyGenerator = KeyGenerator.getInstance("AES");
+               keyGenerator = KeyGenerator.getInstance("AES");
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
-
             keyGenerator.init(256);
             secretKey = keyGenerator.generateKey();
         }
+
+
         final String encodedKey = Base64.getEncoder().encodeToString(secretKey.getEncoded());
         byte[] encoded = secretKey.getEncoded();
 

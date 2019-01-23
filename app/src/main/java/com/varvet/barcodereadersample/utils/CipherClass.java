@@ -25,12 +25,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
@@ -42,6 +44,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class CipherClass {
@@ -51,7 +54,10 @@ public class CipherClass {
     int tryb;
     Context context;
 
-    public CipherClass(Uri uri,Context context, String key, int tryb) throws URISyntaxException {
+    private static final String initVector = "encryptionIntVec";
+    IvParameterSpec iv;
+
+    public CipherClass(Uri uri,Context context, String key, int tryb) throws URISyntaxException, UnsupportedEncodingException {
         //file = new File(PathUtil.getPath(context, uri));
         //file = new File(uri.getPath());
 /*
@@ -63,6 +69,7 @@ public class CipherClass {
         this.tryb = tryb;
         readFromUri(uri, context);
         this.context=context;
+
 
 
         Log.d("cipher1","elo");
@@ -140,7 +147,7 @@ public class CipherClass {
 
 
     public byte[] testBytes() throws IOException {
-        Log.d("cipher1","elow");
+       // Log.d("cipher1","elow");
         byte[] bytes = new byte[(int) file.length()];
         BufferedInputStream bis = new BufferedInputStream(new FileInputStream(filePath));
         DataInputStream dos = new DataInputStream(bis);
@@ -152,20 +159,22 @@ public class CipherClass {
         return bytes;
     }
 
-    public boolean encrypt(byte[] text,File file) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException {
+    public boolean encrypt(byte[] text,File file) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException, IOException, InvalidAlgorithmParameterException {
+
+        iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
         OutputStream outputStream = null;
-        Cipher cipher = Cipher.getInstance("AES");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
         TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator();
         byte[] decodedKey = Base64.getDecoder().decode(key);
 // rebuild key using SecretKeySpec
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length,"AES");// totp.getAlgorithm());
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length,totp.getAlgorithm());
 
 
        Log.e("testKey",new String(decodedKey));
 
-        Calendar cal = Calendar.getInstance();//data to token
+        Calendar cal = Calendar.getInstance();
         Date act = cal.getTime();
-        long transformedDate = act.getTime();//date to byte array
+        long transformedDate = act.getTime();
         byte[] timeStampBytes= longToBytes(transformedDate);
 
         int token = totp.generateOneTimePassword(originalKey,act);
@@ -177,9 +186,10 @@ public class CipherClass {
         for(int i = 0; i< byteToken.length;i++){
             decodedKey[i]=byteToken[i];
         }
+
         SecretKey tempKey = new SecretKeySpec(decodedKey,0,decodedKey.length,totp.getAlgorithm());
 
-        cipher.init(Cipher.ENCRYPT_MODE,tempKey);
+        cipher.init(Cipher.ENCRYPT_MODE,tempKey,iv);
         byte[] cipheredText = cipher.doFinal(text);
            Log.e("key",new String(decodedKey));
 
@@ -217,16 +227,16 @@ public class CipherClass {
 
     public boolean decrypt(byte[] text,File file) throws Exception{
         OutputStream outputStream = null;
-        if((text.length-8)%16!=0) {
+    /*    if((text.length-8)%16!=0) {
             MainActivity.Companion.setTryb(-1);
             return false;
-        }
-        Cipher cipher = Cipher.getInstance("AES");
+        }*/
+        iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
         TimeBasedOneTimePasswordGenerator totp = new TimeBasedOneTimePasswordGenerator();
         byte[] decodedKey = Base64.getDecoder().decode(key);
 
 // rebuild key using SecretKeySpec
-        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");//totp.getAlgorithm());
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, totp.getAlgorithm());
 
         byte[] cipherTime = new byte[8];
 
@@ -259,10 +269,10 @@ public class CipherClass {
         SecretKey tempKey = new SecretKeySpec(decodedKey,0,decodedKey.length,totp.getAlgorithm());
 
 
-        Cipher c2 = Cipher.getInstance("AES");
+        Cipher c2 = Cipher.getInstance("AES/CBC/PKCS5PADDING");
 
         Log.e("keyle",new String(decodedKey));
-        c2.init(Cipher.DECRYPT_MODE,tempKey);
+        c2.init(Cipher.DECRYPT_MODE,tempKey,iv);
         Log.e("keyle",Integer.toString(encodedText.length));
 
         Log.e("keyletext",Integer.toString(text.length));
